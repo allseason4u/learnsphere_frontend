@@ -9,7 +9,7 @@ import {
   Clock,
   CheckCircle,
 } from "lucide-react";
-import LandingLayout from "../../Components/layout/landingLayout.jsx";
+import LandingLayout from "@/Components/layout/landingLayout.jsx";
 
 function Contact() {
   const [formData, setFormData] = useState({

@@ -25,7 +25,7 @@ import {
   Download,
   Share2,
 } from "lucide-react";
-import LandingLayout from "../../Components/layout/landingLayout.jsx";
+import LandingLayout from "@/Components/layout/landingLayout.jsx";
 function Courses() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");

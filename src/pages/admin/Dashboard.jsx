@@ -13,7 +13,7 @@ import {
   Award,
   Activity,
 } from "lucide-react";
-import AdminLayout from "../../Components/layout/adminLayout";
+import AdminLayout from "@/Components/layout/adminLayout";
 
 function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);

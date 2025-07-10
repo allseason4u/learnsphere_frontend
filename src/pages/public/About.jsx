@@ -11,7 +11,7 @@ import {
   Zap,
   Star,
 } from "lucide-react";
-import LandingLayout from "../../Components/layout/landingLayout.jsx";
+import LandingLayout from "@/Components/layout/landingLayout.jsx";
 
 function About() {
   const [isVisible, setIsVisible] = useState({});

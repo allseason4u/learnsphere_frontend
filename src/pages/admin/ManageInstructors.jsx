@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Plus,
   Edit,
@@ -9,103 +9,37 @@ import {
   BookOpen,
   Search,
 } from "lucide-react";
-
-  import AdminLayout from "@/Components/layout/adminLayout";
+import AdminLayout from "@/Components/layout/adminLayout";
 
 function ManageInstructors() {
-  const [instructors, setInstructors] = useState([
-    {
-      id: 1,
-      name: "Dr. Aditi Sharma",
-      email: "aditi.sharma@learnsphere.com",
-      courses: ["React Basics", "Advanced CSS"],
-      status: "active",
-      joinDate: "2023-01-15",
-      avatar: "AS",
-    },
-    {
-      id: 2,
-      name: "Mr. Rohan Mehta",
-      email: "rohan.mehta@learnsphere.com",
-      courses: ["Python for Data Science"],
-      status: "active",
-      joinDate: "2023-03-20",
-      avatar: "RM",
-    },
-    {
-      id: 3,
-      name: "Ms. Sneha Kapoor",
-      email: "sneha.kapoor@learnsphere.com",
-      courses: ["UI/UX Design", "Graphic Design"],
-      status: "blocked",
-      joinDate: "2023-02-10",
-      avatar: "SK",
-    },
-    {
-      id: 4,
-      name: "Mr. Rishi Shekhawat",
-      email: "rishishekhawat@learnsphere.com",
-      courses: ["Microbiology", "Botany", "Zoology"],
-      status: "active",
-      joinDate: "2023-04-05",
-      avatar: "RS",
-    },
-    {
-      id: 5,
-      name: "Ms. Naina Mathur",
-      email: "nainamathur@learnsphere.com",
-      courses: ["Digital Marketing"],
-      status: "active",
-      joinDate: "2023-05-12",
-      avatar: "NM",
-    },
-    {
-      id: 6,
-      name: "Mr. Lavesh Arora",
-      email: "lavesharora@learnsphere.com",
-      courses: ["Business Management", "Economics"],
-      status: "active",
-      joinDate: "2023-06-18",
-      avatar: "LA",
-    },
-  ]);
-
+  const [instructors, setInstructors] = useState([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingInstructor, setEditingInstructor] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    courses: "",
+    courses: "x",
   });
 
-  const filteredInstructors = instructors.filter(
-    (instructor) =>
-      instructor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      instructor.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    fetchInstructors();
+  }, []);
 
-  const handleAddInstructor = () => {
+  const fetchInstructors = async () => {
+    const res = await axios.get(api_instructors);
+    setInstructors(res.data);
+  };
+
+  const handleAddInstructor = async () => {
     if (formData.name && formData.email) {
-      const newInstructor = {
-        id: Date.now(),
+      const res = await axios.post(api_instructors, {
         name: formData.name,
         email: formData.email,
-        courses: formData.courses
-          .split(",")
-          .map((course) => course.trim())
-          .filter((course) => course),
-        status: "active",
-        joinDate: new Date().toISOString().split("T")[0],
-        avatar: formData.name
-          .split(" ")
-          .map((n) => n[0])
-          .join("")
-          .toUpperCase(),
-      };
-      setInstructors([...instructors, newInstructor]);
-      setFormData({ name: "", email: "", courses: "" });
-      setShowAddForm(false);
+        courses: formData.courses.split(",").map((c) => c.trim()),
+      });
+      setInstructors([...instructors, res.data]);
+      resetForm();
     }
   };
 
@@ -119,51 +53,30 @@ function ManageInstructors() {
     setShowAddForm(true);
   };
 
-  const handleUpdateInstructor = () => {
-    if (formData.name && formData.email) {
-      setInstructors(
-        instructors.map((instructor) =>
-          instructor.id === editingInstructor.id
-            ? {
-                ...instructor,
-                name: formData.name,
-                email: formData.email,
-                courses: formData.courses
-                  .split(",")
-                  .map((course) => course.trim())
-                  .filter((course) => course),
-                avatar: formData.name
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")
-                  .toUpperCase(),
-              }
-            : instructor
-        )
-      );
-      setFormData({ name: "", email: "", courses: "" });
-      setShowAddForm(false);
-      setEditingInstructor(null);
-    }
-  };
-
-  const handleDeleteInstructor = (id) => {
-    if (window.confirm("Are you sure you want to delete this instructor?")) {
-      setInstructors(instructors.filter((instructor) => instructor.id !== id));
-    }
-  };
-
-  const handleToggleStatus = (id) => {
+  const handleUpdateInstructor = async () => {
+    const res = await axios.put(`${api_instructors}/${editingInstructor._id}`, {
+      name: formData.name,
+      email: formData.email,
+      courses: formData.courses.split(",").map((c) => c.trim()),
+    });
     setInstructors(
-      instructors.map((instructor) =>
-        instructor.id === id
-          ? {
-              ...instructor,
-              status: instructor.status === "active" ? "blocked" : "active",
-            }
-          : instructor
-      )
+      instructors.map((ins) => (ins._id === res.data._id ? res.data : ins))
     );
+    resetForm();
+  };
+
+  const handleToggleStatus = async (id) => {
+    const res = await axios.patch(`${api_instructors}/${id}/status`);
+    setInstructors(
+      instructors.map((ins) => (ins._id === res.data._id ? res.data : ins))
+    );
+  };
+
+  const handleDeleteInstructor = async (id) => {
+    if (window.confirm("Are you sure?")) {
+      await axios.delete(`${api_instructors}/${id}`);
+      setInstructors(instructors.filter((ins) => ins._id !== id));
+    }
   };
 
   const resetForm = () => {
@@ -171,6 +84,12 @@ function ManageInstructors() {
     setShowAddForm(false);
     setEditingInstructor(null);
   };
+
+  const filteredInstructors = instructors.filter(
+    (instructor) =>
+      instructor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      instructor.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <AdminLayout>
@@ -207,7 +126,7 @@ function ManageInstructors() {
             </button>
           </div>
 
-          {/* Add/Edit Form Modal */}
+          {/* Form Modal */}
           {showAddForm && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
               <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
@@ -215,48 +134,33 @@ function ManageInstructors() {
                   {editingInstructor ? "Edit Instructor" : "Add New Instructor"}
                 </h2>
                 <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Full Name
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.name}
-                      onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
-                      }
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      placeholder="Enter full name"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Email Address
-                    </label>
-                    <input
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) =>
-                        setFormData({ ...formData, email: e.target.value })
-                      }
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      placeholder="Enter email address"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Courses (comma-separated)
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.courses}
-                      onChange={(e) =>
-                        setFormData({ ...formData, courses: e.target.value })
-                      }
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      placeholder="e.g., React Basics, Advanced CSS"
-                    />
-                  </div>
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl"
+                    placeholder="Full Name"
+                  />
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl"
+                    placeholder="Email"
+                  />
+                  {/* <input
+                    type="text"
+                    value={formData.courses}
+                    onChange={(e) =>
+                      setFormData({ ...formData, courses: e.target.value })
+                    }
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl"
+                    placeholder="Courses (comma separated)"
+                  /> */}
                 </div>
                 <div className="flex gap-3 mt-8">
                   <button
@@ -265,13 +169,13 @@ function ManageInstructors() {
                         ? handleUpdateInstructor
                         : handleAddInstructor
                     }
-                    className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-3 rounded-xl font-semibold transition-all duration-300"
+                    className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-xl font-semibold"
                   >
                     {editingInstructor ? "Update" : "Add"} Instructor
                   </button>
                   <button
                     onClick={resetForm}
-                    className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-3 rounded-xl font-semibold transition-all duration-300"
+                    className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-xl font-semibold"
                   >
                     Cancel
                   </button>
@@ -280,18 +184,17 @@ function ManageInstructors() {
             </div>
           )}
 
-          {/* Instructors Grid */}
+          {/* Instructor Cards */}
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {filteredInstructors.map((instructor) => (
               <div
-                key={instructor.id}
-                className={`bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border-l-4 ${
+                key={instructor._id}
+                className={`bg-white rounded-2xl shadow-lg p-6 border-l-4 ${
                   instructor.status === "active"
                     ? "border-green-500"
                     : "border-red-500"
                 }`}
               >
-                {/* Header */}
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <div
@@ -301,7 +204,11 @@ function ManageInstructors() {
                           : "bg-gray-400"
                       }`}
                     >
-                      {instructor.avatar}
+                      {instructor.name
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")
+                        .toUpperCase()}
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-800">
@@ -324,8 +231,7 @@ function ManageInstructors() {
                   </div>
                 </div>
 
-                {/* Courses */}
-                <div className="mb-4">
+                {/* <div className="mb-4">
                   <div className="flex items-center gap-2 mb-2">
                     <BookOpen className="w-4 h-4 text-gray-600" />
                     <span className="text-sm font-medium text-gray-700">
@@ -342,45 +248,40 @@ function ManageInstructors() {
                       </span>
                     ))}
                   </div>
-                </div>
+                </div> */}
 
-                {/* Join Date */}
                 <div className="text-sm text-gray-500 mb-4">
                   Joined: {new Date(instructor.joinDate).toLocaleDateString()}
                 </div>
 
-                {/* Actions */}
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleEditInstructor(instructor)}
-                    className="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-600 py-2 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2"
+                    className="flex-1 bg-blue-50 text-blue-600 py-2 rounded-lg font-medium flex items-center justify-center gap-2"
                   >
-                    <Edit className="w-4 h-4" />
-                    Edit
+                    <Edit className="w-4 h-4" /> Edit
                   </button>
                   <button
-                    onClick={() => handleToggleStatus(instructor.id)}
-                    className={`flex-1 py-2 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
+                    onClick={() => handleToggleStatus(instructor._id)}
+                    className={`flex-1 py-2 rounded-lg font-medium flex items-center justify-center gap-2 ${
                       instructor.status === "active"
-                        ? "bg-red-50 hover:bg-red-100 text-red-600"
-                        : "bg-green-50 hover:bg-green-100 text-green-600"
+                        ? "bg-red-50 text-red-600"
+                        : "bg-green-50 text-green-600"
                     }`}
                   >
                     {instructor.status === "active" ? (
                       <>
-                        <UserX className="w-4 h-4" />
-                        Block
+                        <UserX className="w-4 h-4" /> Block
                       </>
                     ) : (
                       <>
-                        <UserCheck className="w-4 h-4" />
-                        Unblock
+                        <UserCheck className="w-4 h-4" /> Unblock
                       </>
                     )}
                   </button>
                   <button
-                    onClick={() => handleDeleteInstructor(instructor.id)}
-                    className="bg-red-50 hover:bg-red-100 text-red-600 p-2 rounded-lg transition-all duration-200"
+                    onClick={() => handleDeleteInstructor(instructor._id)}
+                    className="bg-red-50 text-red-600 p-2 rounded-lg"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -388,18 +289,6 @@ function ManageInstructors() {
               </div>
             ))}
           </div>
-
-          {filteredInstructors.length === 0 && (
-            <div className="text-center py-12">
-              <div className="text-gray-400 text-6xl mb-4">👨‍🏫</div>
-              <h3 className="text-xl font-semibold text-gray-600 mb-2">
-                No instructors found
-              </h3>
-              <p className="text-gray-500">
-                Try adjusting your search or add a new instructor
-              </p>
-            </div>
-          )}
         </div>
       </div>
     </AdminLayout>

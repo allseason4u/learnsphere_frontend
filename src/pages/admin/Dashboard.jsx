@@ -22,31 +22,24 @@ function Dashboard() {
   const stats = [
     {
       title: "Total Courses",
-      value: "120",
+      value: "0",
       change: "+12%",
       icon: BookOpen,
       color: "from-violet-500 to-purple-600",
     },
     {
       title: "Total Users",
-      value: "4,350",
+      value: "0",
       change: "+8%",
       icon: Users,
       color: "from-blue-500 to-cyan-600",
     },
     {
       title: "Active Instructors",
-      value: "75",
+      value: "0",
       change: "+5%",
       icon: UserCheck,
       color: "from-emerald-500 to-teal-600",
-    },
-    {
-      title: "Completion Rate",
-      value: "89%",
-      change: "+3%",
-      icon: TrendingUp,
-      color: "from-orange-500 to-red-600",
     },
   ];
 
@@ -140,105 +133,6 @@ function Dashboard() {
                 </p>
               </div>
             ))}
-          </div>
-
-          {/* Announcements Section */}
-          <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900">
-                Latest Announcements
-              </h2>
-              <button className="text-violet-600 hover:text-violet-700 font-medium text-sm">
-                View All
-              </button>
-            </div>
-            <div className="space-y-4">
-              {announcements.map((announcement, index) => (
-                <div
-                  key={index}
-                  className="p-4 border border-gray-100 rounded-xl hover:border-violet-200 hover:bg-violet-50 transition-all duration-200 cursor-pointer group"
-                >
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex items-center space-x-2">
-                      <div
-                        className={`w-2 h-2 rounded-full ${
-                          announcement.priority === "high"
-                            ? "bg-red-500"
-                            : announcement.priority === "medium"
-                            ? "bg-yellow-500"
-                            : "bg-green-500"
-                        }`}
-                      />
-                      <h3 className="font-semibold text-gray-900 group-hover:text-violet-700 transition-colors">
-                        {announcement.title}
-                      </h3>
-                    </div>
-                    <span className="text-sm text-gray-500 flex items-center space-x-1">
-                      <Calendar className="w-3 h-3" />
-                      <span>{announcement.time}</span>
-                    </span>
-                  </div>
-                  <p className="text-gray-600 text-sm leading-relaxed">
-                    {announcement.description}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Activity Feed */}
-          <div className="mt-8 bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-            <h2 className="text-xl font-bold text-gray-900 mb-6">
-              Recent Activity
-            </h2>
-            <div className="space-y-4">
-              {[
-                {
-                  user: "Sarah Johnson",
-                  action: "completed",
-                  item: "Advanced React Course",
-                  time: "2 minutes ago",
-                },
-                {
-                  user: "Mike Chen",
-                  action: "enrolled in",
-                  item: "Machine Learning Basics",
-                  time: "1 hour ago",
-                },
-                {
-                  user: "Emily Davis",
-                  action: "submitted",
-                  item: "Final Project - Data Analysis",
-                  time: "3 hours ago",
-                },
-              ].map((activity, index) => (
-                <div
-                  key={index}
-                  className="flex items-center space-x-4 p-3 hover:bg-gray-50 rounded-lg transition-colors"
-                >
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                    <span className="text-white font-semibold text-sm">
-                      {activity.user
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </span>
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm">
-                      <span className="font-medium text-gray-900">
-                        {activity.user}
-                      </span>
-                      <span className="text-gray-600"> {activity.action} </span>
-                      <span className="font-medium text-gray-900">
-                        {activity.item}
-                      </span>
-                    </p>
-                    <p className="text-xs text-gray-500">{activity.time}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       </AdminLayout>

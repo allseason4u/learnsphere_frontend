@@ -1,95 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
   Search,
   Edit,
   Trash2,
   Plus,
-  Filter,
-  Users,
   GraduationCap,
   Mail,
   Calendar,
-  MoreVertical,
+  Users,
+  Filter,
 } from "lucide-react";
-
 import AdminLayout from "@/Components/layout/adminLayout";
+import { api_students } from "../../utils/constants";
 
 function ManageStudents() {
-  const [students, setStudents] = useState([
-    {
-      id: 1,
-      name: "Ananya Verma",
-      email: "ananya.verma@student.learnsphere.com",
-      enrollmentDate: "2024-01-15",
-      course: "Computer Science",
-      status: "Active",
-      avatar:
-        "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
-      progress: 85,
-      lastActive: "2 hours ago",
-    },
-    {
-      id: 2,
-      name: "Rahul Singh",
-      email: "rahul.singh@student.learnsphere.com",
-      enrollmentDate: "2024-02-20",
-      course: "Data Science",
-      status: "Active",
-      avatar:
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-      progress: 72,
-      lastActive: "1 day ago",
-    },
-    {
-      id: 3,
-      name: "Ishika Gupta",
-      email: "ishika.gupta@student.learnsphere.com",
-      enrollmentDate: "2024-03-10",
-      course: "Web Development",
-      status: "Inactive",
-      avatar:
-        "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
-      progress: 45,
-      lastActive: "1 week ago",
-    },
-    {
-      id: 4,
-      name: "Arjun Patel",
-      email: "arjun.patel@student.learnsphere.com",
-      enrollmentDate: "2024-01-28",
-      course: "Digital Marketing",
-      status: "Active",
-      avatar:
-        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-      progress: 93,
-      lastActive: "30 minutes ago",
-    },
-    {
-      id: 5,
-      name: "Priya Sharma",
-      email: "priya.sharma@student.learnsphere.com",
-      enrollmentDate: "2024-02-05",
-      course: "UI/UX Design",
-      status: "Active",
-      avatar:
-        "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
-      progress: 67,
-      lastActive: "5 hours ago",
-    },
-    {
-      id: 6,
-      name: "Vikram Reddy",
-      email: "vikram.reddy@student.learnsphere.com",
-      enrollmentDate: "2024-03-15",
-      course: "Machine Learning",
-      status: "Active",
-      avatar:
-        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
-      progress: 56,
-      lastActive: "3 hours ago",
-    },
-  ]);
-
+  const [students, setStudents] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [courseFilter, setCourseFilter] = useState("All");
@@ -101,54 +27,67 @@ function ManageStudents() {
     course: "",
     status: "Active",
   });
+  useEffect(() => {
+    fetchStudents();
+  }, []);
 
-  const courses = [...new Set(students.map((student) => student.course))];
+  const fetchStudents = async () => {
+    try {
+      const res = await axios.get(api_students);
+      setStudents(res.data);
+    } catch (err) {
+      console.error("Error fetching students:", err);
+    }
+  };
 
-  const filteredStudents = students.filter((student) => {
+  const courses = [...new Set(students.map((s) => s.course))];
+
+  const filteredStudents = students.filter((s) => {
     const matchesSearch =
-      student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      statusFilter === "All" || student.status === statusFilter;
-    const matchesCourse =
-      courseFilter === "All" || student.course === courseFilter;
+      s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      s.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === "All" || s.status === statusFilter;
+    const matchesCourse = courseFilter === "All" || s.course === courseFilter;
     return matchesSearch && matchesStatus && matchesCourse;
   });
+
+  const handleAddStudent = async () => {
+    if (!newStudent.name || !newStudent.email || !newStudent.course) return;
+    try {
+      const res = await axios.post(api_students, newStudent);
+      setStudents([...students, res.data]);
+      setNewStudent({ name: "", email: "", course: "", status: "Active" });
+      setShowAddForm(false);
+    } catch (err) {
+      console.error("Error adding student:", err);
+    }
+  };
 
   const handleEdit = (student) => {
     setEditingStudent({ ...student });
   };
 
-  const handleSaveEdit = () => {
-    setStudents(
-      students.map((student) =>
-        student.id === editingStudent.id ? editingStudent : student
-      )
-    );
-    setEditingStudent(null);
-  };
-
-  const handleDelete = (studentId) => {
-    if (window.confirm("Are you sure you want to delete this student?")) {
-      setStudents(students.filter((student) => student.id !== studentId));
+  const handleSaveEdit = async () => {
+    try {
+      const res = await axios.put(
+        `${api_students}/${editingStudent._id}`,
+        editingStudent
+      );
+      setStudents(students.map((s) => (s._id === res.data._id ? res.data : s)));
+      setEditingStudent(null);
+    } catch (err) {
+      console.error("Error updating student:", err);
     }
   };
 
-  const handleAddStudent = () => {
-    if (newStudent.name && newStudent.email && newStudent.course) {
-      const student = {
-        id: Math.max(...students.map((s) => s.id)) + 1,
-        ...newStudent,
-        enrollmentDate: new Date().toISOString().split("T")[0],
-        avatar: `https://images.unsplash.com/photo-${
-          Math.floor(Math.random() * 10) + 1494790108755
-        }?w=150&h=150&fit=crop&crop=face`,
-        progress: 0,
-        lastActive: "Just now",
-      };
-      setStudents([...students, student]);
-      setNewStudent({ name: "", email: "", course: "", status: "Active" });
-      setShowAddForm(false);
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this student?")) {
+      try {
+        await axios.delete(`${api_students}/${id}`);
+        setStudents(students.filter((s) => s._id !== id));
+      } catch (err) {
+        console.error("Error deleting student:", err);
+      }
     }
   };
 
@@ -222,7 +161,7 @@ function ManageStudents() {
                   </div>
                 </div>
               </div>
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-lg">
+              {/* <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-lg">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-gray-600">Avg Progress</p>
@@ -238,7 +177,7 @@ function ManageStudents() {
                     <Calendar className="h-6 w-6 text-purple-600" />
                   </div>
                 </div>
-              </div>
+              </div> */}
               <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-lg">
                 <div className="flex items-center justify-between">
                   <div>

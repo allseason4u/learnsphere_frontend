@@ -1,6 +1,13 @@
 import React, { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { loginAdmin } from "@/Features/admin/adminSlice";
 
 function AdminLogin() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
@@ -34,14 +41,17 @@ function AdminLogin() {
 
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const res = await axios.post("http://localhost:5000/api/admin/login", {
+        email,
+        password,
+      });
 
-      // Mock success
-      console.log("Login successful");
-      // navigate("/admin/Dashboard");
+      dispatch(
+        loginAdmin({ token: res.data.token, email: res.data.admin.email })
+      );
+      navigate("/admin/dashboard");
     } catch (error) {
-      setErrorMsg("Login failed. Please try again.");
+      setErrorMsg(error.response?.data?.message || "Login failed. Try again.");
     } finally {
       setIsLoading(false);
     }

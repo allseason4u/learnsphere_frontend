@@ -18,6 +18,12 @@ import Announcements from "@/pages/admin/Announcements";
 import ManageUsers from "@/pages/admin/ManageUsers";
 import Reports from "@/pages/admin/Reports";
 import ManageInstructors from "@/pages/admin/ManageInstructors";
+import AdminPrivateRoute from "@/router/AdminPrivateRoute";
+
+import StudentAssignments from "@/pages/student/Assignments";
+import StudentBrowseCourses from "@/pages/student/BrowseCourses";
+import StudentProgress from "@/pages/student/Progress";
+import MyCourses from "@/pages/student/mycourses";
 
 export default function AppRouter() {
   return (
@@ -35,14 +41,53 @@ export default function AppRouter() {
 
         {/* ADMIN ROUTES  */}
         <Route path="/AdminLogin" element={<AdminLogin />} />
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route path="/admin/managecourses" element={<ManageCourses />} />
-        <Route path="/admin/manageusers" element={<ManageUsers />} />
-        <Route path="/admin/reports" element={<Reports />} />
-        <Route path="/admin/announcements" element={<Announcements />} />
+        <Route
+          path="/admin/dashboard"
+          element={
+            <AdminPrivateRoute>
+              <AdminDashboard />
+            </AdminPrivateRoute>
+          }
+        />
+        <Route
+          path="/admin/managecourses"
+          element={
+            <AdminPrivateRoute>
+              <ManageCourses />
+            </AdminPrivateRoute>
+          }
+        />
+        <Route
+          path="/admin/manageusers"
+          element={
+            <AdminPrivateRoute>
+              <ManageUsers />
+            </AdminPrivateRoute>
+          }
+        />
+        <Route
+          path="/admin/reports"
+          element={
+            <AdminPrivateRoute>
+              <Reports />
+            </AdminPrivateRoute>
+          }
+        />
+        <Route
+          path="/admin/announcements"
+          element={
+            <AdminPrivateRoute>
+              <Announcements />
+            </AdminPrivateRoute>
+          }
+        />
         <Route
           path="/admin/manageinstructors"
-          element={<ManageInstructors />}
+          element={
+            <AdminPrivateRoute>
+              <ManageInstructors />
+            </AdminPrivateRoute>
+          }
         />
 
         {/* INSTURCTOR ROUTES  */}
@@ -50,7 +95,14 @@ export default function AppRouter() {
         <Route path="/instructor/dashboard" element={<InstructorDashboard />} />
 
         {/* STUDENT / USERS ROUTES */}
+        <Route path="/student/assignments" element={<StudentAssignments />} />
+        <Route
+          path="/student/browsecourses"
+          element={<StudentBrowseCourses />}
+        />
+        <Route path="/student/mycourses" element={<MyCourses />} />
         <Route path="/student/dashboard" element={<StudentDashboard />} />
+        <Route path="/student/Progress" element={<StudentProgress />} />
 
         <Route path="*" element={<div>404 Not Found</div>} />
       </Routes>

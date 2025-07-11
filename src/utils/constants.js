@@ -16,4 +16,9 @@ export const NOTIFICATION_TYPES = {
   ANNOUNCEMENT: "announcement",
 };
 
-export const DEFAULT_PROFILE_IMG = "/assets/images/default-user.png";
+const LiveUrl = "";
+const localUrl = "http://localhost:5000/";
+const baseurl = localUrl;
+export const api_instructors = `${baseurl}api/instructors`;
+export const api_courses = `${baseurl}api/courses`;
+export const api_students = `${baseurl}api/students`;

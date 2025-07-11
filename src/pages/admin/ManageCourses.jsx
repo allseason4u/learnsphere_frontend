@@ -1,88 +1,21 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import {
   Plus,
   BookOpen,
   Star,
   Users,
-  Clock,
+  Calendar,
   Trash2,
   Edit3,
-  Code,
-  Database,
-  Globe,
-  Trophy,
-  User,
-  DollarSign,
-  Calendar,
 } from "lucide-react";
 import AdminLayout from "@/Components/layout/adminLayout";
-function ManageCourses() {
-  const [courses, setCourses] = useState([
-    {
-      id: 1,
-      name: "Full Stack Web Development",
-      description:
-        "Master modern web development with cutting-edge technologies and real-world projects.",
-      technologies: ["React", "Node.js", "MongoDB", "+1 more"],
-      rating: 4.9,
-      students: 2847,
-      duration: "6 Months",
-      instructor: {
-        name: "Alex Johnson",
-        avatar: "AJ",
-        level: "Expert",
-      },
-      level: "Intermediate Level",
-      originalPrice: 52500,
-      currentPrice: 35000,
-      category: "Full Stack",
-      color: "from-blue-500 to-purple-600",
-      badge: "Best Seller",
-    },
-    {
-      id: 2,
-      name: "Advanced CSS & Animation",
-      description:
-        "Create stunning animations and modern layouts with advanced CSS techniques.",
-      technologies: ["CSS3", "SASS", "Framer Motion", "GSAP"],
-      rating: 4.7,
-      students: 1543,
-      duration: "4 Months",
-      instructor: {
-        name: "Sarah Chen",
-        avatar: "SC",
-        level: "Expert",
-      },
-      level: "Advanced Level",
-      originalPrice: 28000,
-      currentPrice: 19500,
-      category: "Frontend",
-      color: "from-pink-500 to-rose-600",
-      badge: "New",
-    },
-    {
-      id: 3,
-      name: "Python Data Science Mastery",
-      description:
-        "Complete data science pipeline from data collection to machine learning deployment.",
-      technologies: ["Python", "Pandas", "TensorFlow", "+2 more"],
-      rating: 4.8,
-      students: 3204,
-      duration: "8 Months",
-      instructor: {
-        name: "Dr. Michael Park",
-        avatar: "MP",
-        level: "PhD",
-      },
-      level: "Beginner to Advanced",
-      originalPrice: 65000,
-      currentPrice: 45000,
-      category: "Data Science",
-      color: "from-green-500 to-emerald-600",
-      badge: "Most Popular",
-    },
-  ]);
+import { api_courses, api_instructors } from "../../utils/constants";
 
+function ManageCourses() {
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [instructors, setInstructors] = useState([]);
   const [newCourse, setNewCourse] = useState({
     name: "",
     description: "",
@@ -96,10 +29,10 @@ function ManageCourses() {
     instructorAvatar: "",
   });
 
-  const [isAdding, setIsAdding] = useState(false);
-  const [showFullForm, setShowFullForm] = useState(false);
   const [editingCourse, setEditingCourse] = useState(null);
   const [editForm, setEditForm] = useState({});
+  const [isAdding, setIsAdding] = useState(false);
+  const [showFullForm, setShowFullForm] = useState(false);
 
   const colors = [
     "from-blue-500 to-purple-600",
@@ -122,12 +55,14 @@ function ManageCourses() {
     "UI/UX",
     "Cloud",
   ];
+
   const levels = [
     "Beginner",
     "Intermediate",
     "Advanced",
     "Beginner to Advanced",
   ];
+
   const badges = [
     "Best Seller",
     "New",
@@ -135,65 +70,91 @@ function ManageCourses() {
     "Featured",
     "Limited Time",
   ];
-
-  const handleAddCourse = () => {
-    if (newCourse.name.trim() !== "") {
-      const newId = Math.max(...courses.map((c) => c.id), 0) + 1;
-      const randomColor = colors[Math.floor(Math.random() * colors.length)];
-      const randomBadge = badges[Math.floor(Math.random() * badges.length)];
-
-      setCourses([
-        ...courses,
-        {
-          id: newId,
-          name: newCourse.name.trim(),
-          description:
-            newCourse.description ||
-            "Comprehensive course covering essential concepts and practical applications.",
-          technologies:
-            newCourse.technologies.length > 0
-              ? newCourse.technologies
-              : ["JavaScript", "HTML", "CSS"],
-          rating: (Math.random() * 1.0 + 4.0).toFixed(1),
-          students: Math.floor(Math.random() * 3000) + 500,
-          duration: newCourse.duration || "3 Months",
-          instructor: {
-            name: newCourse.instructorName || "John Doe",
-            avatar: newCourse.instructorAvatar || "JD",
-            level: "Expert",
-          },
-          level: newCourse.level || "Intermediate Level",
-          originalPrice: parseInt(newCourse.originalPrice) || 40000,
-          currentPrice: parseInt(newCourse.currentPrice) || 25000,
-          category: newCourse.category || "General",
-          color: randomColor,
-          badge: randomBadge,
-        },
-      ]);
-
-      setNewCourse({
-        name: "",
-        description: "",
-        technologies: [],
-        duration: "",
-        level: "",
-        originalPrice: "",
-        currentPrice: "",
-        category: "",
-        instructorName: "",
-        instructorAvatar: "",
-      });
-      setIsAdding(false);
-      setShowFullForm(false);
+  const fetchInstructors = async () => {
+    try {
+      const res = await axios.get(api_instructors);
+      if (Array.isArray(res.data)) {
+        setInstructors(res.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch instructors:", err.message);
+    }
+  };
+  const fetchCourses = async () => {
+    try {
+      const res = await axios.get(api_courses);
+      if (Array.isArray(res.data)) {
+        setCourses(res.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch courses:", err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleDeleteCourse = (id) => {
-    setCourses(courses.filter((course) => course.id !== id));
+  useEffect(() => {
+    fetchCourses();
+    fetchInstructors();
+  }, []);
+
+  const resetNewCourse = () => {
+    setNewCourse({
+      name: "",
+      description: "",
+      technologies: [],
+      duration: "",
+      level: "",
+      originalPrice: "",
+      currentPrice: "",
+      category: "",
+      instructorName: "",
+      instructorAvatar: "",
+    });
+    setIsAdding(false);
+    setShowFullForm(false);
+  };
+
+  const handleAddCourse = async () => {
+    if (!newCourse.name.trim()) return;
+
+    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+    const randomBadge = badges[Math.floor(Math.random() * badges.length)];
+
+    const coursePayload = {
+      ...newCourse,
+      rating: parseFloat((Math.random() * 1 + 4).toFixed(1)),
+      students: Math.floor(Math.random() * 3000) + 500,
+      color: randomColor,
+      badge: randomBadge,
+      instructor: {
+        name: newCourse.instructorName || "John Doe",
+        avatar: newCourse.instructorAvatar || "JD",
+      },
+      originalPrice: parseInt(newCourse.originalPrice) || 40000,
+      currentPrice: parseInt(newCourse.currentPrice) || 25000,
+    };
+
+    try {
+      await axios.post(api_courses, coursePayload);
+      await fetchCourses(); // Refresh list
+      resetNewCourse();
+    } catch (err) {
+      console.error("Error adding course:", err.message);
+    }
+  };
+
+  const handleDeleteCourse = async (id) => {
+    try {
+      await axios.delete(`${api_courses}/${id}`);
+      await fetchCourses(); // Refresh list
+    } catch (err) {
+      console.error("Failed to delete course:", err.message);
+    }
   };
 
   const handleEditCourse = (course) => {
-    setEditingCourse(course.id);
+    setEditingCourse(course._id);
     setEditForm({
       name: course.name,
       description: course.description,
@@ -203,36 +164,27 @@ function ManageCourses() {
       originalPrice: course.originalPrice,
       currentPrice: course.currentPrice,
       category: course.category,
-      instructorName: course.instructor.name,
-      instructorAvatar: course.instructor.avatar,
+      instructorName: course.instructor?.name,
+      instructorAvatar: course.instructor?.avatar,
     });
   };
 
-  const handleSaveEdit = (courseId) => {
-    setCourses(
-      courses.map((course) =>
-        course.id === courseId
-          ? {
-              ...course,
-              name: editForm.name,
-              description: editForm.description,
-              technologies: editForm.technologies,
-              duration: editForm.duration,
-              level: editForm.level,
-              originalPrice: editForm.originalPrice,
-              currentPrice: editForm.currentPrice,
-              category: editForm.category,
-              instructor: {
-                ...course.instructor,
-                name: editForm.instructorName,
-                avatar: editForm.instructorAvatar,
-              },
-            }
-          : course
-      )
-    );
-    setEditingCourse(null);
-    setEditForm({});
+  const handleSaveEdit = async () => {
+    try {
+      await axios.put(`${api_courses}/${editingCourse}`, {
+        ...editForm,
+        instructor: {
+          name: editForm.instructorName,
+          avatar: editForm.instructorAvatar,
+        },
+      });
+      await fetchCourses();
+    } catch (err) {
+      console.error("Failed to update course:", err.message);
+    } finally {
+      setEditingCourse(null);
+      setEditForm({});
+    }
   };
 
   const handleCancelEdit = () => {
@@ -251,7 +203,6 @@ function ManageCourses() {
       style: "currency",
       currency: "INR",
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
     }).format(price);
   };
 
@@ -435,18 +386,33 @@ function ManageCourses() {
                       />
 
                       <div className="flex gap-3">
-                        <input
-                          type="text"
+                        <select
                           value={newCourse.instructorName}
-                          onChange={(e) =>
+                          onChange={(e) => {
+                            const selected = instructors.find(
+                              (inst) => inst._id === e.target.value
+                            );
                             setNewCourse({
                               ...newCourse,
-                              instructorName: e.target.value,
-                            })
-                          }
-                          placeholder="Instructor Name"
+                              instructorName: selected.name,
+                              instructorAvatar: selected.name
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")
+                                .slice(0, 2)
+                                .toUpperCase(),
+                            });
+                          }}
                           className="flex-1 border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all duration-300 bg-white/70 backdrop-blur-sm"
-                        />
+                        >
+                          <option value="">Select Instructor</option>
+                          {instructors.map((inst) => (
+                            <option key={inst._id} value={inst._id}>
+                              {inst.name}
+                            </option>
+                          ))}
+                        </select>
+
                         <input
                           type="text"
                           value={newCourse.instructorAvatar}
@@ -508,12 +474,11 @@ function ManageCourses() {
                 </div>
                 Your Courses
                 <span className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-full text-lg font-semibold shadow-lg">
-                  {courses.length}
+                  {courses?.length}
                 </span>
               </h2>
             </div>
-
-            {courses.length === 0 ? (
+            {courses?.length === 0 ? (
               <div className="text-center py-20">
                 <div className="w-32 h-32 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-6">
                   <BookOpen className="w-16 h-16 text-gray-400" />
@@ -525,15 +490,15 @@ function ManageCourses() {
               </div>
             ) : (
               <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
-                {courses.map((course, index) => (
+                {courses?.map((course, index) => (
                   <div
-                    key={course.id}
+                    key={course._id}
                     className="group bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 hover:shadow-3xl transform hover:-translate-y-2 transition-all duration-500 animate-in slide-in-from-bottom-4 overflow-hidden"
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
                     {/* Course Header */}
                     <div className="relative p-8 pb-6">
-                      {editingCourse === course.id ? (
+                      {editingCourse === course._id ? (
                         /* Edit Mode */
                         <div className="space-y-4">
                           <div className="flex items-center justify-between mb-4">
@@ -544,7 +509,7 @@ function ManageCourses() {
                             </div>
                             <div className="flex gap-2">
                               <button
-                                onClick={() => handleSaveEdit(course.id)}
+                                onClick={() => handleSaveEdit(course._id)}
                                 className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 text-sm"
                               >
                                 Save
@@ -728,7 +693,7 @@ function ManageCourses() {
                                   <Edit3 className="w-4 h-4" />
                                 </button>
                                 <button
-                                  onClick={() => handleDeleteCourse(course.id)}
+                                  onClick={() => handleDeleteCourse(course._id)}
                                   className="w-10 h-10 bg-red-500 hover:bg-red-600 text-white rounded-xl flex items-center justify-center shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
                                 >
                                   <Trash2 className="w-4 h-4" />

@@ -23,7 +23,7 @@ import AdminPrivateRoute from "@/router/AdminPrivateRoute";
 import StudentAssignments from "@/pages/student/Assignments";
 import StudentBrowseCourses from "@/pages/student/BrowseCourses";
 import StudentProgress from "@/pages/student/Progress";
-import MyCourses from "@/pages/student/mycourses";
+import MyCourses from "@/pages/student/MyCourses";
 
 export default function AppRouter() {
   return (

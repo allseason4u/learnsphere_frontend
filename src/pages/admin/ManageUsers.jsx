@@ -11,7 +11,7 @@ import {
   Users,
   Filter,
 } from "lucide-react";
-import AdminLayout from "@/Components/layout/adminLayout";
+import AdminLayout from "@/Components/layout/AdminLayout";
 import { api_students } from "../../utils/constants";
 
 function ManageStudents() {

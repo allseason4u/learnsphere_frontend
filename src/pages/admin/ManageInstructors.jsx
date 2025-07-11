@@ -9,7 +9,7 @@ import {
   BookOpen,
   Search,
 } from "lucide-react";
-import AdminLayout from "@/Components/layout/adminLayout";
+import AdminLayout from "@/Components/layout/AdminLayout";
 
 function ManageInstructors() {
   const [instructors, setInstructors] = useState([]);

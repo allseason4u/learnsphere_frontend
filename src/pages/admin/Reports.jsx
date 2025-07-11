@@ -32,7 +32,7 @@ import {
   FileText,
   Video,
 } from "lucide-react";
-import AdminLayout from "@/Components/layout/adminLayout";
+import AdminLayout from "@/Components/layout/AdminLayout";
 
 const courseEngagementData = [
   { name: "Week 1", completions: 89, submissions: 76, logins: 95 },

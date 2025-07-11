@@ -10,7 +10,7 @@ import {
   User,
 } from "lucide-react";
 
-import AdminLayout from "@/Components/layout/adminLayout";
+import AdminLayout from "@/Components/layout/AdminLayout";
 
 function AnnouncementsBoard() {
   const announcements = [

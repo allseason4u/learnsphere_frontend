@@ -9,7 +9,7 @@ import {
   Trash2,
   Edit3,
 } from "lucide-react";
-import AdminLayout from "@/Components/layout/adminLayout";
+import AdminLayout from "@/Components/layout/AdminLayout";
 import { api_courses, api_instructors } from "../../utils/constants";
 
 function ManageCourses() {

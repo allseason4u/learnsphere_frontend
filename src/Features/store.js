@@ -1,7 +1,7 @@
 // src/app/store.js
 import { configureStore } from "@reduxjs/toolkit";
-import adminReducer from "@/features/admin/adminSlice";
-import courseReducer from "@/features/admin/courseSlice";
+import adminReducer from "@/Features/admin/adminSlice";
+import courseReducer from "@/Features/admin/courseSlice";
 
 export const store = configureStore({
   reducer: {
